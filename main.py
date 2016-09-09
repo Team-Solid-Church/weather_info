@@ -2,7 +2,7 @@ from sys import argv, exit
 import datetime
 
 import requests
-
+import sys
 
 def get_weather(payload, forecast_length='1'):
     """
@@ -49,9 +49,15 @@ def main():
         #1 day vs 5 day forecast
         print("\n1 = Current Forecast")
         print("2 = Five Day Forecast")
+        print("0 = Exit")
         forecast_length = input("> ")
-        weather = get_weather(payload, forecast_length)
 
+        #exit program
+        if forecast_length =="0":
+            sys.exit(0)
+
+        weather = get_weather(payload, forecast_length)
+   
         #1day
         if forecast_length == "1":
             print ("\nCurrent Weather: ")
@@ -62,6 +68,7 @@ def main():
 
         #5 day
         elif forecast_length == "2":
+            print("Five Day Forecast:")
             # TODO: Just do a function
             days_only = [entry for entry in weather["list"]
                          if "11:" in datetime.datetime.fromtimestamp(
@@ -71,10 +78,13 @@ def main():
                 date = datetime.datetime.fromtimestamp(
                     int(day["dt"])
                 ).strftime('%Y-%m-%d')
-                print(date)
+                print("\tDay: " + str(date))
+                print("\t\tTemperature: " + str(day["main"]["temp"]))
+                print("\t\tHumidity: " + str(day["main"]["humidity"]))
+                print("\t\tDescription: " + str(day["weather"][0]["description"]))
+                print("\t\tWind Speed: " + str(day["wind"]["speed"]))
 
 
-    # print("Current Temp: {}".format(weather["main"]["temp"]))
 
 if __name__ == '__main__':
     main()

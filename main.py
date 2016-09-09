@@ -1,8 +1,31 @@
-from sys import argv, exit
+from sys import argv
 import datetime
+import json
+import os
 
 import requests
 import sys
+
+
+def save_location(city, country):
+    with open('saved_state/save.json', 'w') as json_file:
+        json.dump([city, country], json_file)
+
+
+def load_saved_state():
+    with open('saved_state/save.json', 'r') as json_file:
+        data = json.load(json_file)
+    return (data[0], data[1])
+
+
+def get_location():
+    city = input("What city? > ")
+    country = input ("What country code? > ")
+    user_input = input('Do you want to save that location? Y or N ')
+    if user_input.lower() == 'y':
+        save_location(city, country)
+    return (city, country)
+
 
 def get_weather(payload, forecast_length='1'):
     """
@@ -27,7 +50,7 @@ def main():
         api_key = argv[1]
     except IndexError:
         print('Please pass in an API key')
-        exit(0)
+        sys.exit(0)
 
     payload = {
         "appid": api_key,
@@ -36,15 +59,27 @@ def main():
     }
 
     #start with user setting location
-    city = input("What city? > ")
-    country = input ("What country code? > ")
-    payload ["q"] = city + "," + country
+    if os.path.exists('saved_state/save.json'):
+        city, country = load_saved_state()
+        user_input = input('Do you want to see the weather for {}, {}? Y or N '
+                           .format(city, country))
+        if user_input.lower() == 'n':
+            city, country = get_location()
+    else:
+        print('Error: file not found')
+        city, country = get_location()
+
+    payload["q"] = city + "," + country
+
 
     '''
     #error check for real city
     if  weather["cod"] == "404":
         print ("That is not a real city.")
     '''
+
+    print('City = {}\nCountry = {}'.format(city, country))
+
     while True:
         #1 day vs 5 day forecast
         print("\n1 = Current Forecast")
@@ -57,7 +92,7 @@ def main():
             sys.exit(0)
 
         weather = get_weather(payload, forecast_length)
-   
+
         #1day
         if forecast_length == "1":
             print ("\nCurrent Weather: ")

@@ -91,3 +91,6 @@ ENV/
 # Temp files
 .swp
 .idea/
+
+# User files
+saved_state/
